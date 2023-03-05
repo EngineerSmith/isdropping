@@ -43,8 +43,8 @@ dropping.eventUpdate = function()
     sdl.SDL_GetWindowPosition(sdl.SDL_GL_GetCurrentWindow(), set())
     local windowX, windowY = get()
     --print("w", windowX, windowY, "m", mouseX, mouseY) -- these will print the same if jit was on
-    local windowW, windowH = love.window.getMode()
     jit.on()
+    local windowW, windowH = love.window.getMode()
     -- is mouse inside window
     if isPointInsideRect(mouseX, mouseY, windowX, windowY, windowW, windowH) then
 
