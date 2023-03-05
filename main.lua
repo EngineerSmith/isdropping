@@ -46,6 +46,10 @@ love.isdropping = function(x, y) -- called each frame the mouse is being held ab
   dropX, dropY = x, y
 end
 
+love.stoppeddropping = function()
+  dropX, dropY = nil, nil
+end
+
 local files = { }
 love.filedropped = function(file)
   local f = { filename = file:getFilename() }
@@ -58,7 +62,6 @@ love.draw = function()
   lg.setColor(1,0,0,1)
   if dropX and dropY then
     lg.circle("fill", dropX, dropY, 8)
-    dropX, dropY = nil, nil
   end
   lg.setColor(0,0,1,1)
   for _, file in ipairs(files) do

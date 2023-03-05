@@ -7,7 +7,9 @@ As there isn't an event in SDL for when a file is being held above the window. T
 # Docs
 
 You can check out `main.lua` for a working example. 
-TLDR; `love.isdropping(x: number, y: number)`
+TLDR; 
+Events: `love.isdropping(x: number, y: number)`, `love.stoppeddropping()`
+Functions: `dropping.eventUpdate()`
 
 ```lua
 local dropping = require("isdropping") -- Require the library
@@ -23,6 +25,10 @@ end -- I  recommend putting it in your love.run before events are polled; see ma
 local dropX, dropY = -50, -50
 love.isdropping = function(x, y) -- add callback
   dropX, dropY = x, y
+end
+
+love.stoppeddropping = function() -- called when mouse leaves window, but doesn't drop
+	dropX, dropY = -50, -50
 end
 
 love.draw = function()

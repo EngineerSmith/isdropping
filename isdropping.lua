@@ -13,10 +13,15 @@ local dropping = {
   stop = false,
   primaryButton = 1, -- primary
   event = "isdropping",
+  eventStopped = "stoppeddropping",
 }
 
 love.handlers[dropping.event] = function(x,y)
   if love[dropping.event] then return love[dropping.event](x,y) end
+end
+
+love.handlers[dropping.eventStopped] = function()
+  if love[dropping.eventStopped] then return love[dropping.eventStopped]() end
 end
 
 local intX = ffi.new("int[1]")
@@ -47,15 +52,18 @@ dropping.eventUpdate = function()
     local windowW, windowH = love.window.getMode()
     -- is mouse inside window
     if isPointInsideRect(mouseX, mouseY, windowX, windowY, windowW, windowH) then
-
       if dropping.heldoutside then -- if mouse was held outside of window, assume it is holding a file
         if button == dropping.primaryButton then
           love.event.push(dropping.event, mouseX - windowX, mouseY - windowY)
         else
+          love.event.push(dropping.eventStopped)
           dropping.heldoutside = false
         end
       end
     else
+      if dropping.heldoutside then
+        love.event.push(dropping.eventStopped)
+      end
       dropping.heldoutside = button == dropping.primaryButton
     end
   end
