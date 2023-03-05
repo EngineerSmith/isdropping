@@ -24,6 +24,18 @@ love.handlers[dropping.eventStopped] = function()
   if love[dropping.eventStopped] then return love[dropping.eventStopped]() end
 end
 
+local oldHandleFile = love.handlers["filedropped"]
+love.handlers["filedropped"] = function(...)
+  dropping.heldoutside = false
+  return oldHandleFile(...)
+end
+
+local oldHandleDir = love.handlers["directorydropped"]
+love.handlers["directorydropped"] = function(...)
+  dropping.heldoutside = false
+  return oldHandleDir(...)
+end
+
 local intX = ffi.new("int[1]")
 local intY = ffi.new("int[1]")
 
@@ -35,6 +47,8 @@ local isPointInsideRect = function(px, py, x, y, w, h)
   return px > x and px < x + w and
          py > y and py < y + h
 end
+
+local wasInWindow = false
 
 dropping.eventUpdate = function()
   if not dropping.stop then
@@ -53,16 +67,17 @@ dropping.eventUpdate = function()
     -- is mouse inside window
     if isPointInsideRect(mouseX, mouseY, windowX, windowY, windowW, windowH) then
       if dropping.heldoutside then -- if mouse was held outside of window, assume it is holding a file
+        wasInWindow = true
         if button == dropping.primaryButton then
           love.event.push(dropping.event, mouseX - windowX, mouseY - windowY)
         else
-          love.event.push(dropping.eventStopped)
           dropping.heldoutside = false
         end
       end
     else
-      if dropping.heldoutside then
+      if wasInWindow and dropping.heldoutside then
         love.event.push(dropping.eventStopped)
+        wasInWindow = false
       end
       dropping.heldoutside = button == dropping.primaryButton
     end
