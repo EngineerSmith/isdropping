@@ -48,7 +48,7 @@ local isPointInsideRect = function(px, py, x, y, w, h)
          py > y and py < y + h
 end
 
-local wasInWindow = false
+local wasInWindow, heldFromWithin = false, false
 
 dropping.eventUpdate = function()
   if not dropping.stop then
@@ -66,15 +66,26 @@ dropping.eventUpdate = function()
     local windowW, windowH = love.window.getMode()
     -- is mouse inside window
     if isPointInsideRect(mouseX, mouseY, windowX, windowY, windowW, windowH) then
-      if dropping.heldoutside then -- if mouse was held outside of window, assume it is holding a file
+      if not heldFromWithin and dropping.heldoutside then -- if mouse was held outside of window, assume it is holding a file
         wasInWindow = true
         if button == dropping.primaryButton then
           love.event.push(dropping.event, mouseX - windowX, mouseY - windowY)
         else
           dropping.heldoutside = false
         end
+      elseif button == dropping.primaryButton then
+        heldFromWithin = true
+      else
+        heldFromWithin = false
+        if wasInWindow then -- nothing was to be dropped, and has been let go
+          love.event.push(dropping.eventStopped)
+          wasInWindow = false
+        end
       end
     else
+      if heldFromWithin and button ~= dropping.primaryButton then
+        heldFromWithin = false
+      end
       if wasInWindow and dropping.heldoutside then
         love.event.push(dropping.eventStopped)
         wasInWindow = false
