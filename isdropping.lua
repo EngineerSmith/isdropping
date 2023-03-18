@@ -51,18 +51,19 @@ end
 local wasInWindow, heldFromWithin = false, false
 
 dropping.eventUpdate = function()
-  if not dropping.stop then
-    jit.off() -- There is a weird ass jit bug where tonumber doesn't actually make variables become lua numbers till you touch them. It works fine with jit.off()
-      -- if jit is on, then memory is shared between mouseX, mouseY and windowX and windowY 
+  if not dropping.stop and not love.window.isMinimized() then
+    -- There is a weird luajit bug where tonumber doesn't actually make variables become lua numbers till you touch them
+      -- The memory is weirdly shared between mouseX, mouseY and windowX and windowY 
     -- get mouse state
     local button = sdl.SDL_GetGlobalMouseState(set())
     local mouseX, mouseY = get()
+    mouseX, mouseY = mouseX + 1, mouseY + 1 -- touch to fix luajit bug
+    mouseX, mouseY = mouseX - 1, mouseY - 1
 
     -- get window state
     sdl.SDL_GetWindowPosition(sdl.SDL_GL_GetCurrentWindow(), set())
     local windowX, windowY = get()
-    --print("w", windowX, windowY, "m", mouseX, mouseY) -- these will print the same if jit was on
-    jit.on()
+    --print("w", windowX, windowY, "m", mouseX, mouseY) -- these will print the same without the touch of mouseX and mouseY
     local windowW, windowH = love.window.getMode()
     -- is mouse inside window
     if isPointInsideRect(mouseX, mouseY, windowX, windowY, windowW, windowH) then
