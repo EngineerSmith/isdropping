@@ -5,6 +5,7 @@ ffi.cdef[[
   SDL_Window *SDL_GL_GetCurrentWindow(void);
   uint32_t SDL_GetGlobalMouseState(int *x, int *y);
   void SDL_GetWindowPosition(SDL_Window * window, int* x, int* y);
+  void SDL_RaiseWindow(SDL_Window * window);
 ]]
 
 local sdl = jit.os == "Windows" and ffi.load("sdl2") or ffi.C
@@ -26,12 +27,14 @@ end
 
 local oldHandleFile = love.handlers["filedropped"]
 love.handlers["filedropped"] = function(...)
+  sdl.SDL_RaiseWindow(sdl.SDL_GL_GetCurrentWindow())
   dropping.heldoutside = false
   return oldHandleFile(...)
 end
 
 local oldHandleDir = love.handlers["directorydropped"]
 love.handlers["directorydropped"] = function(...)
+  sdl.SDL_RaiseWindow(sdl.SDL_GL_GetCurrentWindow())
   dropping.heldoutside = false
   return oldHandleDir(...)
 end
