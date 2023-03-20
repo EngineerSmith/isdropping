@@ -17,6 +17,10 @@ local dropping = {
   eventStopped = "stoppeddropping",
 }
 
+love.window.focus = function() -- function to request focus of the window; useful to do when dropping has been successful 
+  sdl.SDL_RaiseWindow(sdl.SDL_GL_GetCurrentWindow())
+end
+
 love.handlers[dropping.event] = function(x,y)
   if love[dropping.event] then return love[dropping.event](x,y) end
 end
@@ -27,14 +31,12 @@ end
 
 local oldHandleFile = love.handlers["filedropped"]
 love.handlers["filedropped"] = function(...)
-  sdl.SDL_RaiseWindow(sdl.SDL_GL_GetCurrentWindow())
   dropping.heldoutside = false
   return oldHandleFile(...)
 end
 
 local oldHandleDir = love.handlers["directorydropped"]
 love.handlers["directorydropped"] = function(...)
-  sdl.SDL_RaiseWindow(sdl.SDL_GL_GetCurrentWindow())
   dropping.heldoutside = false
   return oldHandleDir(...)
 end
@@ -78,7 +80,11 @@ dropping.eventUpdate = function()
           dropping.heldoutside = false
         end
       elseif button == dropping.primaryButton then
-        heldFromWithin = true
+        if love.window.hasMouseFocus() then
+          heldFromWithin = true
+        else
+          dropping.heldoutside = true -- assume a file has been grabbed from a window above this one
+        end
       else
         heldFromWithin = false
         if wasInWindow then -- nothing was to be dropped, and has been let go
