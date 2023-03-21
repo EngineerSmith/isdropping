@@ -56,6 +56,10 @@ end
 local wasInWindow, heldFromWithin = false, false
 
 dropping.eventUpdate = function()
+  if dropping.thisFrame then
+    dropping.thisFrame = false
+    dropping.heldoutside = not love.window.hasMouseFocus() -- edge case; if hold down mouse to gain window focus
+  end
   if not dropping.stop and not love.window.isMinimized() then
     -- There is a weird luajit bug where tonumber doesn't actually make variables become lua numbers till you touch them
       -- The memory is weirdly shared between mouseX, mouseY and windowX and windowY 
@@ -84,6 +88,7 @@ dropping.eventUpdate = function()
           heldFromWithin = true
         else
           dropping.heldoutside = true -- assume a file has been grabbed from a window above this one
+          dropping.thisFrame = true
         end
       else
         heldFromWithin = false
